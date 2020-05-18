@@ -11,6 +11,7 @@ from matplotlib.animation import FuncAnimation
 SIZE = int(sys.argv[1]) if len(sys.argv) > 1 else 50
 ITER = int(sys.argv[2]) if len(sys.argv) > 2 else 10
 DT = float(sys.argv[3]) if len(sys.argv) > 3 else 10.0
+print("SIMULATION DE TAILLE {0}x{0} SUR {1} FRAMES A VITESSE {2}".format(SIZE, ITER, DT))
 
 ###* DATA
 ##* Gas
@@ -32,6 +33,26 @@ for i in range(1, ITER + 1):
 T_MIN, T_MAX = np.min(temp), np.max(temp)
 
 ###* FIGURES
+def frame(t:int):
+    global temp, T_MIN, T_MAX
+    if t >= len(temp):
+        for i in range(len(temp), t + 1):
+            temp = np.vstack((temp, [np.add(temp[-1], comp_gas)]))
+        T_MIN, T_MAX = np.min(temp), np.max(temp)
+    fig = plt.figure(num="Simulation [{0}] (x{1})".format(t, DT))
+    #* Gas
+    ax_gas = fig.add_subplot(121)
+    ax_gas.set_axis_off()
+    fig_gas = ax_gas.matshow(gas, cmap="GnBu", aspect="equal")
+    cb_gas = fig.colorbar(ScalarMappable(norm=Normalize(vmin=C_MIN, vmax=C_MAX), cmap="GnBu"), ax=ax_gas, cmap="GnBu", orientation="horizontal")
+    ax_gas.set_title("Concentration en gaz [ppm]", weight="bold")
+    #* Temperature
+    ax_temp = fig.add_subplot(122)
+    ax_temp.set_axis_off()
+    fig_temp = ax_temp.matshow(temp[t], cmap="jet", aspect="equal")
+    cb_temp = fig.colorbar(ScalarMappable(norm=Normalize(vmin=T_MIN, vmax=T_MAX), cmap="jet"), ax=ax_temp, cmap="jet", orientation="horizontal")
+    ax_temp.set_title("Température [K]", weight="bold")
+    plt.show()
 def animate(fps:int=5):
     fig = plt.figure(num="Simulation (x{0})".format(DT))
     #* Gas
@@ -52,7 +73,6 @@ def animate(fps:int=5):
         return [fig_temp]
     FuncAnimation(fig, anim, frames=len(temp), interval=(1000/fps), blit=True)
     plt.show()
-animate()
 def stats():
     fig = plt.figure(num="Statistiques sur la simulation (x{0})".format(DT))
     #* Gas
@@ -76,4 +96,3 @@ def stats():
     ax_temp.set_ylabel("Température [K]", weight="bold")
     ax_temp.set_title("Température moyenne", weight="bold")
     plt.show()
-stats()
