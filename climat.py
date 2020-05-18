@@ -1,5 +1,4 @@
 import sys
-import random
 from lib.perlin import PerlinNoiseFactory
 import numpy as np
 from matplotlib import pyplot as plt
